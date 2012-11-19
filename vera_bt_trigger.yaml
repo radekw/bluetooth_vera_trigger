@@ -1,0 +1,9 @@
+---
+bluetooth_ping_command: /usr/local/bin/btctest
+vera_available_trigger_urls:
+- http://localhost/?v=1
+vera_not_available_trigger_urls:
+- http://localhost/?v=0
+bluetooth_devices:
+- 00:11:22:33:44:55
+
