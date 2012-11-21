@@ -125,9 +125,10 @@ def main():
                   options.config)
             sys.exit(1)
     else:
-        for cdir in [os.path.join('/', 'etc'),
-                    os.path.dirname(__file__)]:
-            config_file = os.path.join(cdir, 'vera_bt_trigger.yaml')
+        cfn = 'vera_bt_trigger.yaml'
+        for config_file in [os.path.join('/', 'etc', cfn),
+                            os.path.expanduser('~/.%s' % cfn),
+                            os.path.join(os.path.dirname(__file__), cfn)]:
             if os.path.exists(config_file):
                 config = load(file(config_file, 'r'), Loader=Loader)
                 break
