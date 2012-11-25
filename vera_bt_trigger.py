@@ -57,7 +57,7 @@ def check_devices():
     for bt_dev in config['bluetooth_devices']:
         cmd = '%s %s' % (config['bluetooth_ping_command'], bt_dev)
         (ret, out) = run_wait(cmd)
-        logging.debug(out)
+        logging.debug(out.rstrip('\n'))
         if ret:
             logging.debug('%s not available' % bt_dev)
         else:
@@ -95,7 +95,7 @@ def check_devices():
     return all_available
 
 ##############################################################################
-def daemon():
+def check_devices_forver():
     while True:
         all_avaliable = check_devices()
         if all_avaliable:
@@ -149,7 +149,7 @@ def main():
     
     if options.daemon:
         while True:
-            daemon()
+            check_devices_forver()
     else:
         check_devices()
 
