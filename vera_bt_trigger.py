@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, logging, subprocess, urllib2, json
+import os, sys, time, logging, subprocess, urllib2, json
 from optparse import OptionParser
 
 from yaml import load
@@ -53,16 +53,16 @@ def get_device_status_from_json(json_string):
 
 ##############################################################################
 def check_devices():
-    all_available = True
+    all_available = False
     for bt_dev in config['bluetooth_devices']:
         cmd = '%s %s' % (config['bluetooth_ping_command'], bt_dev)
         (ret, out) = run_wait(cmd)
         logging.debug(out)
         if ret:
-            all_available = False
             logging.debug('%s not available' % bt_dev)
         else:
             logging.debug('%s available' % bt_dev)
+            all_available = True
             
     if all_available:
         logging.info('triggering vera_triggers -> available')
@@ -78,21 +78,32 @@ def check_devices():
             action_url = url
             for k, v in dev.items():
                 action_url += '&%s=%s' % (k, v)
-            logging.debug('status_url: %s' % status_url)
-            logging.debug('action_url: %s' % action_url)
+            logging.debug('accessing status_url: %s' % status_url)
             status_json = open_url(status_url)
             if status_json is None:
                 break
             status = get_device_status_from_json(status_json)
-            logging.debug('current status: %s' % status)
-            logging.debug('requested state: %s' % dev['newTargetValue'])
+            logging.debug('status: current: %s; requested: %s' % \
+                          (status, dev['newTargetValue']))
             if str(status) == str(dev['newTargetValue']):
                 logging.info('no action on DeviceNum %s' % dev['DeviceNum'])
                 break
             logging.info('triggering DeviceNum %s' % dev['DeviceNum'])
+            logging.debug('accessing action_url: %s' % action_url)
             open_url(action_url)
-            
+    
+    return all_available
 
+##############################################################################
+def daemon():
+    while True:
+        all_avaliable = check_devices()
+        if all_avaliable:
+            sleep_time = 120
+        else:
+            sleep_time = 10
+        time.sleep(sleep_time)
+        
 ##############################################################################
 def main():
     global options, config
@@ -103,6 +114,9 @@ def main():
     parser.add_option('-c', '--config', default=None,
                       action='store', type='string', dest='config',
                       help='Configuration file')
+    parser.add_option('-d', '--daemon', dest='daemon',
+                      action='store_true', default=False,
+                      help='Run as daemon')
     parser.add_option('-v', '--verbose', dest='verbose',
                       action='store_true', default=False,
                       help='Update its own record')
@@ -133,7 +147,11 @@ def main():
                 config = load(file(config_file, 'r'), Loader=Loader)
                 break
     
-    check_devices()
+    if options.daemon:
+        while True:
+            daemon()
+    else:
+        check_devices()
 
 ##############################################################################
 if __name__ == "__main__":
