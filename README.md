@@ -1,4 +1,4 @@
-# Vera Bluetooth Trigger
+# Bluetooth Vera Trigger
 
 This uses the btctest command line tool to test if a bluetooth device is in range and triggers a URL action on Vera.
 
