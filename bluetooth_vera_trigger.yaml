@@ -2,18 +2,17 @@
 bluetooth_ping_command: /usr/local/bin/btctest
 bluetooth_devices:
 - 00:11:22:33:44:55
-vera_url: http://192.168.10.2:3480
+vera_url: http://192.168.10.116:3480
 vera_triggers:
   available:
     - id: lu_action
       DeviceNum: 28
       serviceId: urn:upnp-org:serviceId:VSwitch1
       action: SetTarget
-      newTargetValue: 0
+      newTargetValue: 1
   not_available:
     - id: lu_action
       DeviceNum: 28
       serviceId: urn:upnp-org:serviceId:VSwitch1
       action: SetTarget
-      newTargetValue: 1
-
+      newTargetValue: 0

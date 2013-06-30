@@ -52,19 +52,8 @@ def get_device_status_from_json(json_string):
     return status
 
 ##############################################################################
-def check_devices():
-    all_available = False
-    for bt_dev in config['bluetooth_devices']:
-        cmd = '%s %s' % (config['bluetooth_ping_command'], bt_dev)
-        (ret, out) = run_wait(cmd)
-        logging.debug(out.rstrip('\n'))
-        if ret:
-            logging.debug('%s not available' % bt_dev)
-        else:
-            logging.debug('%s available' % bt_dev)
-            all_available = True
-            
-    if all_available:
+def trigger(available):
+    if available:
         logging.info('triggering vera_triggers -> available')
         devices = config['vera_triggers']['available']
     else:
@@ -91,6 +80,21 @@ def check_devices():
             logging.info('triggering DeviceNum %s' % dev['DeviceNum'])
             logging.debug('accessing action_url: %s' % action_url)
             open_url(action_url)
+
+##############################################################################
+def check_devices():
+    all_available = False
+    for bt_dev in config['bluetooth_devices']:
+        cmd = '%s %s' % (config['bluetooth_ping_command'], bt_dev)
+        (ret, out) = run_wait(cmd)
+        logging.debug(out.rstrip('\n'))
+        if ret:
+            logging.debug('%s not available' % bt_dev)
+        else:
+            logging.debug('%s available' % bt_dev)
+            all_available = True
+    
+    trigger(all_available)
     
     return all_available
 
@@ -135,7 +139,7 @@ def main():
         if os.path.exists(options.config):
             config = load(file(options.config, 'r'), Loader=Loader)
         else:
-            print('ERROR: configuration file %s does not exist' %
+            logging.error('ERROR: configuration file %s does not exist' %
                   options.config)
             sys.exit(1)
     else:
